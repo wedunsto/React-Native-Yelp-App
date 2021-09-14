@@ -8,18 +8,26 @@ const Search =()=>{
     const [search, setSearch] = useState('');
     //Used to generate search results
     const [results, setResults] = useState([]);
+    //Used to detect errors in API query
+    const [errorMessage, setErrorMessage] = useState('');
 
     //Helper function to generate search results
     const searchApi =async()=>{
-        //send search query to API with parameters
-        const response = await Yelp.get('/search',
-        {params:{
-            limit:50,
-            term: {search},
-            location: 'Raleigh'
-        }});
-        //Store search results in the results array
-        setResults(response.data.businesses);
+        //Try-catch block for API error handling
+        try{
+            //send search query to API with parameters
+            const response = await Yelp.get('/search',
+            {params:{
+                limit:50,
+                term: {search},
+                location: 'Raleigh'
+            }});
+            //Store search results in the results array
+            setResults(response.data.businesses);
+        }
+        catch(err){
+            setErrorMessage('Something went wrong');
+        }
     };
 
     return(
@@ -29,7 +37,11 @@ const Search =()=>{
                 onSearchChange={(newValue)=> setSearch(newValue)}
                 //Call helper function when searching
                 onSearchEnd={()=> searchApi()}/>
-            <Text>{`Found ${results.length} search results`}</Text>
+                {
+                    errorMessage.length>0
+                    ? <Text>{errorMessage}</Text>
+                    : <Text>{`Found ${results.length} search results`}</Text>
+                }
         </View>
     );
 };
